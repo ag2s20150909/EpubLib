@@ -1,0 +1,3 @@
+rootProject.name = "Book"
+include ':app'
+include ':epublib'
