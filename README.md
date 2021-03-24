@@ -8,5 +8,6 @@ Comparing to the original epublib and epub4j, we contains the following changes:
 * Add support of EPUB 3.x.
 * Upgrade jzlib to last version.
 
-
-## 
+### EPUB2 and EPUB3
+![epub2](img/epub2.jpg)
+![epub3](img/epub3.jpg)
