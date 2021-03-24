@@ -77,12 +77,12 @@ public class MainActivity extends BaseActivity {
                 //data就是资源的内容数据，可能是css,html,图片等等
                 byte[] data = resource.getData();
                 // 获取到内容的类型  css,html,还是图片
-                ss.append(resource.getHref()).append(tocReference.getTitle()).append("\n");
+                ss.append("父目录").append(resource.getHref()).append(tocReference.getTitle()).append("\n");
                 MediaType mediaType = resource.getMediaType();
                 if (tocReference.getChildren().size() > 0) {
                     //子目录
                    for(TOCReference r:tocReference.getChildren()) {
-                       ss.append(r.getResource().getHref()).append(r.getTitle()).append("\n");
+                       ss.append("子目录").append(r.getResource().getHref()).append(r.getTitle()).append("\n");
                    }
                 }
             }
