@@ -30,11 +30,11 @@ android {
 
 dependencies {
 
-
+    //因为安卓自带的XmlPullParserFactory
+    //me.ag2s.epublib.epub.EpubProcessorSupport
+    //修改createXmlSerializer方法可使用kxml2
     // https://mvnrepository.com/artifact/kxml2/kxml2
     //implementation 'kxml2:kxml2:2.3.0'
-
-    //implementation 'org.slf4j:slf4j-android:1.7.25'
-    def poiVersion="4.1.0"
-    //implementation "com.github.SUPERCILEX.poi-android:poi:$poiVersion"
+    //去除了slf4j依赖
+    //implementation 'org.slf4j:-android:1.7.25'
 }

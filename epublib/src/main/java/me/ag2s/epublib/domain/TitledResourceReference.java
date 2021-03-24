@@ -58,6 +58,11 @@ public class TitledResourceReference extends ResourceReference
           + fragmentId;
     }
   }
+  @Override
+  public Resource getResource() {
+    resource.setTitle(title);
+    return resource;
+  }
 
   public void setResource(Resource resource, String fragmentId) {
     super.setResource(resource);

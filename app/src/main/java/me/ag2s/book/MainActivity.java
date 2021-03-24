@@ -10,7 +10,6 @@ import android.view.View;
 import android.widget.TextView;
 
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
@@ -78,12 +77,12 @@ public class MainActivity extends BaseActivity {
                 //data就是资源的内容数据，可能是css,html,图片等等
                 byte[] data = resource.getData();
                 // 获取到内容的类型  css,html,还是图片
-                ss.append(resource.getHref()).append("\n");
+                ss.append(resource.getHref()).append(tocReference.getTitle()).append("\n");
                 MediaType mediaType = resource.getMediaType();
                 if (tocReference.getChildren().size() > 0) {
                     //子目录
                    for(TOCReference r:tocReference.getChildren()) {
-                       ss.append(r.getResource().getHref()).append("\n");
+                       ss.append(r.getResource().getHref()).append(r.getTitle()).append("\n");
                    }
                 }
             }
@@ -106,7 +105,7 @@ public class MainActivity extends BaseActivity {
 
     public void createEPUB(View view) {
         try {
-            String path = "/sdcard/ag2sapp/test";
+            String path = this.getExternalFilesDir("book").getPath();
             // Create new Book
             Book book = new Book();
             Metadata metadata = book.getMetadata();
@@ -130,7 +129,8 @@ public class MainActivity extends BaseActivity {
                     "青山依旧在，几度夕阳红。");
 //
 //             Set cover image
-            book.setCoverImage(ResourceUtil.createResource(new File(path + "/test.jpg")));
+            InputStream inputStream=getAssets().open("test.jpg");
+            book.setCoverImage(new Resource(inputStream,"cover.jpg"));
 
             // Add Chapter 1
             String txt = "";
@@ -144,7 +144,7 @@ public class MainActivity extends BaseActivity {
 
 
             // Add css file
-            book.getResources().add(new Resource("h1 {color: blue;font-size: 36px;}p {text-indent:2em;font-size:24px;}".getBytes(), "css/style.css"));
+            book.getResources().add(new Resource("h1 {color: blue;}p {text-indent:2em;}".getBytes(), "css/style.css"));
 //
 //            // Add Chapter 2
 //            TOCReference chapter2 = book.addSection("Second Chapter",
@@ -166,7 +166,7 @@ public class MainActivity extends BaseActivity {
             EpubWriter epubWriter = new EpubWriter();
 
             // Write the Book as Epub
-            epubWriter.write(book, new FileOutputStream(path + "/test1_book1.epub"));
+            epubWriter.write(book, new FileOutputStream(path + "/test.epub"));
             viewModel.msg.postValue("生成EPUB完成");
         } catch (Exception e) {
             e.printStackTrace();

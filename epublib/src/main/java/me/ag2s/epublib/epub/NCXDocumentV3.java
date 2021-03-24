@@ -80,10 +80,10 @@ public class NCXDocumentV3 extends NCXDocument {
             if (ncxResource == null) {
                 return ncxResource;
             }
-            Log.d(TAG, ncxResource.getHref());
+            //Log.d(TAG, ncxResource.getHref());
 
             Document ncxDocument = ResourceUtil.getAsDocument(ncxResource);
-            Log.d(TAG, ncxDocument.getNodeName());
+            //Log.d(TAG, ncxDocument.getNodeName());
 
             Element navMapElement = (Element) ncxDocument.getElementsByTagName("nav").item(0);
             navMapElement = (Element) navMapElement.getElementsByTagName("ol").item(0);
@@ -91,6 +91,7 @@ public class NCXDocumentV3 extends NCXDocument {
 
             TableOfContents tableOfContents = new TableOfContents(
                     readTOCReferences(navMapElement.getChildNodes(), book));
+            Log.d(TAG,tableOfContents.toString());
             book.setTableOfContents(tableOfContents);
         } catch (Exception e) {
             Log.e(TAG, e.getMessage(), e);
@@ -101,12 +102,14 @@ public class NCXDocumentV3 extends NCXDocument {
     public static List<TOCReference> doToc(Node n, Book book) {
         List<TOCReference> result = new ArrayList<>();
 
-        if (n == null) {
+        if (n == null||n.getNodeType() != Document.ELEMENT_NODE) {
             return result;
-        } else if (n.getNodeType() != Document.ELEMENT_NODE) {
-            return result;
-        } else {
+        }
+        else {
             Element el= (Element) n;
+            if (el.getTagName().equals("li")){
+                result.add(readTOCReference(el,book));
+            }
             NodeList nodeList=el.getElementsByTagName("li");
             for (int i=0;i<nodeList.getLength();i++){
                 result.add(readTOCReference((Element) nodeList.item(i),book));
@@ -125,13 +128,11 @@ public class NCXDocumentV3 extends NCXDocument {
         if (navpoints == null) {
             return new ArrayList<>();
         }
-        Log.d(TAG, "readTOCReferences:navpoints.getLength()" + navpoints.getLength());
-        List<TOCReference> result = new ArrayList<>(
-                navpoints.getLength());
+        //Log.d(TAG, "readTOCReferences:navpoints.getLength()" + navpoints.getLength());
+        List<TOCReference> result = new ArrayList<>();
         for (int i = 0; i < navpoints.getLength(); i++) {
             Node node = navpoints.item(i);
             result.addAll(doToc(node, book));
-
         }
 
 
@@ -141,7 +142,7 @@ public class NCXDocumentV3 extends NCXDocument {
 
     static TOCReference readTOCReference(Element navpointElement, Book book) {
         String label = readNavLabel(navpointElement);
-        Log.d(TAG, "label:" + label);
+        //Log.d(TAG, "label:" + label);
         String tocResourceRoot = StringUtil
                 .substringBeforeLast(book.getSpine().getTocResource().getHref(), '/');
         if (tocResourceRoot.length() == book.getSpine().getTocResource().getHref()
@@ -168,7 +169,7 @@ public class NCXDocumentV3 extends NCXDocument {
     }
 
     private static String readNavReference(Element navpointElement) {
-        Log.d(TAG, "readNavReference:" + navpointElement.getTagName());
+        //Log.d(TAG, "readNavReference:" + navpointElement.getTagName());
         Element contentElement = DOMUtil
                 .getFirstElementByTagNameNS(navpointElement, NAMESPACE_NCX,
                         NCXDocumentV3.NCXTags.content);
@@ -185,7 +186,7 @@ public class NCXDocumentV3 extends NCXDocument {
     }
 
     private static String readNavLabel(Element navpointElement) {
-        Log.d(TAG, "readNavLabel:" + navpointElement.getTagName());
+        //Log.d(TAG, "readNavLabel:" + navpointElement.getTagName());
         Element navLabel = DOMUtil
                 .getFirstElementByTagNameNS(navpointElement, NAMESPACE_NCX,
                         NCXDocumentV3.NCXTags.navLabel);

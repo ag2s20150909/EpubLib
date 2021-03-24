@@ -124,7 +124,7 @@ public class NCXDocumentV2 extends NCXDocument{
 
   static TOCReference readTOCReference(Element navpointElement, Book book) {
     String label = readNavLabel(navpointElement);
-    Log.d(TAG,"label:"+label);
+    //Log.d(TAG,"label:"+label);
     String tocResourceRoot = StringUtil
         .substringBeforeLast(book.getSpine().getTocResource().getHref(), '/');
     if (tocResourceRoot.length() == book.getSpine().getTocResource().getHref()
@@ -165,7 +165,7 @@ public class NCXDocumentV2 extends NCXDocument{
   }
 
   private static String readNavLabel(Element navpointElement) {
-    Log.d(TAG,navpointElement.getTagName());
+    //Log.d(TAG,navpointElement.getTagName());
     Element navLabel = DOMUtil
         .getFirstElementByTagNameNS(navpointElement, NAMESPACE_NCX,
             NCXTags.navLabel);
