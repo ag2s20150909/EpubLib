@@ -9,6 +9,8 @@ import android.view.View;
 import android.widget.TextView;
 
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
@@ -58,6 +60,7 @@ public class MainActivity extends BaseActivity {
         try {
             EpubReader reader = new EpubReader();
             InputStream in = getAssets().open(name);
+            //InputStream in= new FileInputStream(new File(filepath));
             Book book = reader.readEpub(in);
             Metadata metadata = book.getMetadata();
             String bookInfo = "作者："+metadata.getAuthors()+

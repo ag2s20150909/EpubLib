@@ -10,6 +10,27 @@ Comparing to the original epublib and epub4j, we contains the following changes:
 
 ## 使用方法
 
+        //读取epub
+        EpubReader reader = new EpubReader();
+        InputStream in = getAssets().open(name);
+        //InputStream in= new FileInputStream(new File(filepath));
+        Book book = reader.readEpub(in);
+        
+        //获取epub文件版本
+        String epubVersion=book.getVersion()
+        
+        //获取epub文件信息
+        Metadata metadata = book.getMetadata();
+        String bookInfo = "作者："+metadata.getAuthors()+
+                            "\n出版社："+metadata.getPublishers()+
+                            "\n出版时间：" +metadata.getDates()+
+                            "\n书名："+metadata.getTitles()+
+                            "\n简介："+metadata.getDescriptions()+
+                            "\n语言："+metadata.getLanguage()+
+                            "\n";
+        
+        
+
        //获取线性的阅读菜单
         List<Resource> spineReferences = book.getTableOfContents().getAllUniqueResources();
         for(Resource sp:spineReferences){
