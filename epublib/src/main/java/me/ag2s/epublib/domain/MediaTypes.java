@@ -1,6 +1,5 @@
 package me.ag2s.epublib.domain;
 
-import me.ag2s.epublib.domain.MediaType;
 import me.ag2s.epublib.util.StringUtil;
 import java.util.HashMap;
 import java.util.Map;

@@ -23,6 +23,12 @@ import me.ag2s.epublib.domain.TableOfContents;
 import me.ag2s.epublib.util.ResourceUtil;
 import me.ag2s.epublib.util.StringUtil;
 
+/**
+ * Writes the ncx document as defined by namespace http://www.daisy.org/z3986/2005/ncx/
+ *
+ * @author Ag2S20150909
+ */
+
 public class NCXDocumentV3 extends NCXDocument {
     public static final String NAMESPACE_NCX = "";
     public static final String PREFIX_NCX = "html";
@@ -173,9 +179,9 @@ public class NCXDocumentV3 extends NCXDocument {
         if (resource == null) {
             Log.e(TAG, "Resource with href " + href + " in NCX document not found");
         }
-        Log.d(TAG, "label:" + label);
-        Log.d(TAG, "href:" + href);
-        Log.d(TAG, "fragmentId:" + fragmentId);
+        Log.v(TAG, "label:" + label);
+        Log.v(TAG, "href:" + href);
+        Log.v(TAG, "fragmentId:" + fragmentId);
 
         //父级目录
         TOCReference result = new TOCReference(label, resource, fragmentId);
@@ -193,12 +199,14 @@ public class NCXDocumentV3 extends NCXDocument {
      * @return
      */
     private static String readNavReference(Element navpointElement) {
+        //https://www.w3.org/publishing/epub/epub-packages.html#sec-package-nav
+        //父级节点必须是 "li"
         //Log.d(TAG, "readNavReference:" + navpointElement.getTagName());
+
         Element contentElement = DOMUtil
-                .getFirstElementByTagNameNS(navpointElement, NAMESPACE_NCX,
-                        NCXDocumentV3.NCXTags.content);
+                .getFirstElementByTagNameNS(navpointElement, "","a");
         String result = DOMUtil
-                .getAttribute(contentElement, NAMESPACE_NCX, NCXDocumentV3.NCXAttributes.src);
+                .getAttribute(contentElement, "", NCXDocumentV3.NCXAttributes.src);
         try {
             result = URLDecoder.decode(result, Constants.CHARACTER_ENCODING);
         } catch (UnsupportedEncodingException e) {
@@ -215,16 +223,24 @@ public class NCXDocumentV3 extends NCXDocument {
      * @return
      */
     private static String readNavLabel(Element navpointElement) {
+        //https://www.w3.org/publishing/epub/epub-packages.html#sec-package-nav
+        //父级节点必须是 "li"
         //Log.d(TAG, "readNavLabel:" + navpointElement.getTagName());
-        Element navLabel = DOMUtil
-                .getFirstElementByTagNameNS(navpointElement, NAMESPACE_NCX,
-                        NCXDocumentV3.NCXTags.navLabel);
         String label="";
-        if(navLabel!=null){
-            label=navLabel.getTextContent();
+        Element labelElement = DOMUtil.getFirstElementByTagNameNS(navpointElement,"","a");
+        label=labelElement.getTextContent();
+        if (StringUtil.isNotBlank(label)){
+            return label;
+        }else {
+            labelElement = DOMUtil.getFirstElementByTagNameNS(navpointElement,"","span");
         }
-        return label;//DOMUtil.getTextChildrenContent(DOMUtil
-        //.getFirstElementByTagNameNS(navLabel, NAMESPACE_NCX, NCXDocumentV3.NCXTags.text));
+        label=labelElement.getTextContent();
+        //如果通过 a 标签无法获取章节列表,则是无href章节名
+        if (StringUtil.isNotBlank(label)){
+           return label;
+        }
+        return label;
+
     }
 
 

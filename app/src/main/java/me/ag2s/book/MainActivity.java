@@ -14,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -24,6 +25,7 @@ import me.ag2s.epublib.domain.Book;
 
 import me.ag2s.epublib.domain.MediaType;
 import me.ag2s.epublib.domain.Metadata;
+import me.ag2s.epublib.domain.Relator;
 import me.ag2s.epublib.domain.Resource;
 
 import me.ag2s.epublib.domain.Resources;
@@ -77,20 +79,21 @@ public class MainActivity extends BaseActivity {
             //通过获取线性的阅读菜单
             List<Resource> spineReferences = book.getTableOfContents().getAllUniqueResources();
             for(Resource sp:spineReferences){
-                Log.d(TAG,sp.getHref()+sp.getTitle());
+                Log.v(TAG,sp.getHref()+sp.getTitle());
+                ss.append("").append(sp.getHref()).append(sp.getTitle()).append("\n");
             }
 
             //获取层级的菜单
             List<TOCReference> tocReferences =book.getTableOfContents().getTocReferences();
             for (TOCReference top:tocReferences){
                 Resource topres= top.getResource();
-                Log.d(TAG,"父目录"+topres.getHref()+topres.getTitle());
-                ss.append("父目录").append(topres.getHref()).append(topres.getTitle()).append("\n");
+                Log.v(TAG,"父目录"+topres.getHref()+topres.getTitle());
+                //ss.append("父目录").append(topres.getHref()).append(topres.getTitle()).append("\n");
                 if (top.getChildren().size()>0){
                     for (TOCReference child:top.getChildren()){
                         Resource childres= child.getResource();
-                        Log.d(TAG,"子目录"+childres.getHref()+childres.getTitle());
-                        ss.append("子目录").append(childres.getHref()).append(childres.getTitle()).append("\n");
+                        Log.v(TAG,"子目录"+childres.getHref()+childres.getTitle());
+                        //ss.append("子目录").append(childres.getHref()).append(childres.getTitle()).append("\n");
                     }
                 }
             }
@@ -121,11 +124,24 @@ public class MainActivity extends BaseActivity {
             Metadata metadata = book.getMetadata();
 
             // Set the title
-
             metadata.addTitle("大奉打更人");
-
+            //set language
+            metadata.setLanguage("zh-rCH");
             // Add an Author
             metadata.addAuthor(new Author("卖报小郎君"));
+            //添加贡献者
+            Author aa=new Author("AAA","BBB");
+            aa.setRelator(Relator.COLLABORATOR);
+            metadata.addContributor(aa);
+            //设置书籍的主题
+            ArrayList<String> subjs=new ArrayList<>();
+            subjs.add("穿越");
+            subjs.add("轻松");
+            subjs.add("阵法");
+            subjs.add("仙侠");
+            subjs.add("幻想修仙");
+            metadata.setSubjects(subjs);
+
 
             metadata.addType("仙侠");
             metadata.addType("幻想修仙");

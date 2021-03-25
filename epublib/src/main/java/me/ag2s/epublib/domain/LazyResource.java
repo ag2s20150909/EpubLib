@@ -15,7 +15,7 @@ import java.io.InputStream;
 public class LazyResource extends Resource {
 
   private static final long serialVersionUID = 5089400472352002866L;
-  private static String TAG= LazyResource.class.getName();
+  private  final String TAG= getClass().getName();
 
   private final LazyResourceProvider resourceProvider;
   private final long cachedSize;
