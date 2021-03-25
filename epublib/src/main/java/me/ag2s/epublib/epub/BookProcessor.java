@@ -14,7 +14,12 @@ public interface BookProcessor {
   /**
    * A BookProcessor that returns the input book unchanged.
    */
-  BookProcessor IDENTITY_BOOKPROCESSOR = book -> book;
+  BookProcessor IDENTITY_BOOKPROCESSOR = new BookProcessor() {
+    @Override
+    public Book processBook(Book book) {
+      return book;
+    }
+  };
 
   Book processBook(Book book);
 }
