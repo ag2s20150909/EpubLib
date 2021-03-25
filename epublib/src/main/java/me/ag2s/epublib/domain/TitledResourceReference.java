@@ -60,6 +60,7 @@ public class TitledResourceReference extends ResourceReference
   }
   @Override
   public Resource getResource() {
+    //修复getTitle为null的bug
     resource.setTitle(title);
     return resource;
   }

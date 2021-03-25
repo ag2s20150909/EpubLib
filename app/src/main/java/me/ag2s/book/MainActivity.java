@@ -4,7 +4,6 @@ package me.ag2s.book;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.os.Bundle;
-import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -25,20 +24,24 @@ import me.ag2s.epublib.domain.MediaType;
 import me.ag2s.epublib.domain.Metadata;
 import me.ag2s.epublib.domain.Resource;
 
+import me.ag2s.epublib.domain.Resources;
+import me.ag2s.epublib.domain.SpineReference;
 import me.ag2s.epublib.domain.TOCReference;
 import me.ag2s.epublib.domain.TableOfContents;
 import me.ag2s.epublib.epub.EpubReader;
 import me.ag2s.epublib.epub.EpubWriter;
 
+import me.ag2s.epublib.epub.NCXDocumentV2;
 import me.ag2s.epublib.util.IOUtil;
 import me.ag2s.epublib.util.ResourceUtil;
 
 public class MainActivity extends BaseActivity {
+    private final String TAG= getClass().getName();
     TextView tv;
     TestViewModel viewModel;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         tv = findViewById(R.id.tv);
@@ -63,29 +66,33 @@ public class MainActivity extends BaseActivity {
                     "\n书名："+metadata.getTitles()+
                     "\n简介："+metadata.getDescriptions()+
                     "\n语言："+metadata.getLanguage()+
-                    "：";
+                    "\n";
             StringBuilder ss = new StringBuilder(bookInfo);
 
-            //String ss="";
-            //获取到书本的目录资源
-            TableOfContents tableOfContents = book.getTableOfContents();
-            System.out.println("目录资源数量为：" + tableOfContents.size());
-            //获取到目录对应的资源数据
-            List<TOCReference> tocReferences = tableOfContents.getTocReferences();
-            for (TOCReference tocReference : tocReferences) {
-                Resource resource = tocReference.getResource();
-                //data就是资源的内容数据，可能是css,html,图片等等
-                byte[] data = resource.getData();
-                // 获取到内容的类型  css,html,还是图片
-                ss.append("父目录").append(resource.getHref()).append(tocReference.getTitle()).append("\n");
-                MediaType mediaType = resource.getMediaType();
-                if (tocReference.getChildren().size() > 0) {
-                    //子目录
-                   for(TOCReference r:tocReference.getChildren()) {
-                       ss.append("子目录").append(r.getResource().getHref()).append(r.getTitle()).append("\n");
-                   }
+            ss.append("EPUB版本:").append(book.getVersion()).append("\n");
+
+            //通过获取线性的阅读菜单
+            List<Resource> spineReferences = book.getTableOfContents().getAllUniqueResources();
+            for(Resource sp:spineReferences){
+                Log.d(TAG,sp.getHref()+sp.getTitle());
+            }
+
+            //获取层级的菜单
+            List<TOCReference> tocReferences =book.getTableOfContents().getTocReferences();
+            for (TOCReference top:tocReferences){
+                Resource topres= top.getResource();
+                Log.d(TAG,"父目录"+topres.getHref()+topres.getTitle());
+                ss.append("父目录").append(topres.getHref()).append(topres.getTitle()).append("\n");
+                if (top.getChildren().size()>0){
+                    for (TOCReference child:top.getChildren()){
+                        Resource childres= child.getResource();
+                        Log.d(TAG,"子目录"+childres.getHref()+childres.getTitle());
+                        ss.append("子目录").append(childres.getHref()).append(childres.getTitle()).append("\n");
+                    }
                 }
             }
+
+
 
             viewModel.msg.postValue(ss.toString());
 
@@ -145,22 +152,22 @@ public class MainActivity extends BaseActivity {
 
             // Add css file
             book.getResources().add(new Resource("h1 {color: blue;}p {text-indent:2em;}".getBytes(), "css/style.css"));
-//
-//            // Add Chapter 2
-//            TOCReference chapter2 = book.addSection("Second Chapter",
-//                    getResource("/book1/chapter2.html", "chapter2.html"));
-//
-//            // Add image used by Chapter 2
+
+            // Add Chapter 2
+            TOCReference chapter2 = book.addSection("Second Chapter",
+                    ResourceUtil.createHTMLResource("Second Chapter", txt));
+
+            // Add image used by Chapter 2
 //            book.getResources().add(
-//                    getResource("/book1/flowers_320x240.jpg", "flowers.jpg"));
-//
-//            // Add Chapter2, Section 1
-//            book.addSection(chapter2, "Chapter 2, section 1",
-//                    getResource("/book1/chapter2_1.html", "chapter2_1.html"));
-//
-//            // Add Chapter 3
-//            book.addSection("Conclusion",
-//                    getResource("/book1/chapter3.html", "chapter3.html"));
+//                    ResourceUtil.createHTMLResource("第一章", txt));
+
+            // Add Chapter2, Section 1
+            book.addSection(chapter2, "Chapter 2, section 1",
+                    ResourceUtil.createHTMLResource("Chapter 2, section 1", txt));
+
+            // Add Chapter 3
+            book.addSection("Conclusion",
+                    ResourceUtil.createHTMLResource("Conclusion", txt));
 
             // Create EpubWriter
             EpubWriter epubWriter = new EpubWriter();

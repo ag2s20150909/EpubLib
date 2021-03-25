@@ -143,6 +143,9 @@ public class NCXDocumentV2 extends NCXDocument{
     if (resource == null) {
       Log.e(TAG,"Resource with href " + href + " in NCX document not found");
     }
+    Log.d(TAG, "label:" + label);
+    Log.d(TAG, "href:" + href);
+    Log.d(TAG, "fragmentId:" + fragmentId);
     TOCReference result = new TOCReference(label, resource, fragmentId);
     List<TOCReference> childTOCReferences = readTOCReferences(
         navpointElement.getChildNodes(), book);
@@ -238,7 +241,7 @@ public class NCXDocumentV2 extends NCXDocument{
           serializer);
     }
 
-    writeMetaElement("generator", Constants.EPUB4J_GENERATOR_NAME, serializer);
+    writeMetaElement("generator", Constants.EPUB_GENERATOR_NAME, serializer);
     writeMetaElement("depth", String.valueOf(tableOfContents.calculateDepth()),
         serializer);
     writeMetaElement("totalPageCount", "0", serializer);

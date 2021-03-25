@@ -6,22 +6,17 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xmlpull.v1.XmlSerializer;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+
 
 import me.ag2s.epublib.Constants;
-import me.ag2s.epublib.domain.Author;
+
 import me.ag2s.epublib.domain.Book;
-import me.ag2s.epublib.domain.Identifier;
-import me.ag2s.epublib.domain.MediaTypes;
+
 import me.ag2s.epublib.domain.Resource;
 import me.ag2s.epublib.domain.TOCReference;
 import me.ag2s.epublib.domain.TableOfContents;
@@ -69,6 +64,13 @@ public class NCXDocumentV3 extends NCXDocument {
 
     }
 
+    /**
+     * 解析epub的目录文件
+     * @param book Book
+     * @param epubReader epubreader
+     * @return
+     */
+
     public static Resource read(Book book, EpubReader epubReader) {
         Resource ncxResource = null;
         if (book.getSpine().getTocResource() == null) {
@@ -99,7 +101,7 @@ public class NCXDocumentV3 extends NCXDocument {
         return ncxResource;
     }
 
-    public static List<TOCReference> doToc(Node n, Book book) {
+    private static List<TOCReference> doToc(Node n, Book book) {
         List<TOCReference> result = new ArrayList<>();
 
         if (n == null || n.getNodeType() != Document.ELEMENT_NODE) {
@@ -126,10 +128,12 @@ public class NCXDocumentV3 extends NCXDocument {
         List<TOCReference> result = new ArrayList<>();
         for (int i = 0; i < navpoints.getLength(); i++) {
             Node node = navpoints.item(i);
+            //如果该node是null,或者不是Element,跳出本次循环
             if (node == null || node.getNodeType() != Document.ELEMENT_NODE) {
                 continue;
             } else {
                 Element el = (Element) node;
+                //如果该Element的name为”li“,将其添加到目录结果
                 if (el.getTagName().equals("li")) {
                     result.add(readTOCReference(el, book));
                 }
@@ -147,6 +151,7 @@ public class NCXDocumentV3 extends NCXDocument {
 
 
     static TOCReference readTOCReference(Element navpointElement, Book book) {
+        //章节的名称
         String label = readNavLabel(navpointElement);
         //Log.d(TAG, "label:" + label);
         String tocResourceRoot = StringUtil
@@ -168,7 +173,13 @@ public class NCXDocumentV3 extends NCXDocument {
         if (resource == null) {
             Log.e(TAG, "Resource with href " + href + " in NCX document not found");
         }
+        Log.d(TAG, "label:" + label);
+        Log.d(TAG, "href:" + href);
+        Log.d(TAG, "fragmentId:" + fragmentId);
+
+        //父级目录
         TOCReference result = new TOCReference(label, resource, fragmentId);
+        //解析子级目录
         List<TOCReference> childTOCReferences = doToc(navpointElement, book);
         //readTOCReferences(
         //navpointElement.getChildNodes(), book);
@@ -176,6 +187,11 @@ public class NCXDocumentV3 extends NCXDocument {
         return result;
     }
 
+    /**
+     * 获取目录节点的href
+     * @param navpointElement
+     * @return
+     */
     private static String readNavReference(Element navpointElement) {
         //Log.d(TAG, "readNavReference:" + navpointElement.getTagName());
         Element contentElement = DOMUtil
@@ -193,12 +209,21 @@ public class NCXDocumentV3 extends NCXDocument {
 
     }
 
+    /**
+     * 获取目录节点里面的章节名
+     * @param navpointElement
+     * @return
+     */
     private static String readNavLabel(Element navpointElement) {
         //Log.d(TAG, "readNavLabel:" + navpointElement.getTagName());
         Element navLabel = DOMUtil
                 .getFirstElementByTagNameNS(navpointElement, NAMESPACE_NCX,
                         NCXDocumentV3.NCXTags.navLabel);
-        return navLabel.getTextContent();//DOMUtil.getTextChildrenContent(DOMUtil
+        String label="";
+        if(navLabel!=null){
+            label=navLabel.getTextContent();
+        }
+        return label;//DOMUtil.getTextChildrenContent(DOMUtil
         //.getFirstElementByTagNameNS(navLabel, NAMESPACE_NCX, NCXDocumentV3.NCXTags.text));
     }
 

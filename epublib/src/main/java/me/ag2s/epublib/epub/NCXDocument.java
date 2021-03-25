@@ -201,7 +201,7 @@ public class NCXDocument {
                     serializer);
         }
 
-        writeMetaElement("generator", Constants.EPUB4J_GENERATOR_NAME, serializer);
+        writeMetaElement("generator", Constants.EPUB_GENERATOR_NAME, serializer);
         writeMetaElement("depth", String.valueOf(tableOfContents.calculateDepth()),
                 serializer);
         writeMetaElement("totalPageCount", "0", serializer);

@@ -29,6 +29,8 @@ android {
 }
 
 dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.0-M1'
+
 
     //因为安卓自带的XmlPullParserFactory
     //me.ag2s.epublib.epub.EpubProcessorSupport
