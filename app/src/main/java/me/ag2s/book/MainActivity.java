@@ -130,8 +130,8 @@ public class MainActivity extends BaseActivity {
             // Add an Author
             metadata.addAuthor(new Author("卖报小郎君"));
             //添加贡献者
-            Author aa=new Author("AAA","BBB");
-            aa.setRelator(Relator.COLLABORATOR);
+            Author aa=new Author("Ag2s Epublib","v0.1");
+            aa.setRelator(Relator.BOOK_PRODUCER);
             metadata.addContributor(aa);
             //设置书籍的主题
             ArrayList<String> subjs=new ArrayList<>();

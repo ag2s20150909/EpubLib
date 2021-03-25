@@ -12,7 +12,6 @@ import me.ag2s.epublib.domain.Spine;
 import me.ag2s.epublib.domain.SpineReference;
 import me.ag2s.epublib.util.ResourceUtil;
 import me.ag2s.epublib.util.StringUtil;
-//import io.documentnode.minilog.Logger;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
