@@ -148,7 +148,7 @@ public class NCXDocumentV3 {
             return new ArrayList<>();
         }
         //Log.d(TAG, "readTOCReferences:navpoints.getLength()" + navpoints.getLength());
-        List<TOCReference> result = new ArrayList<>();
+        List<TOCReference> result = new ArrayList<>(navpoints.getLength());
         for (int i = 0; i < navpoints.getLength(); i++) {
             Node node = navpoints.item(i);
             //如果该node是null,或者不是Element,跳出本次循环
