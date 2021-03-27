@@ -33,7 +33,7 @@ import me.ag2s.epublib.util.StringUtil;
  * @author Ag2S20150909
  */
 
-public class NCXDocumentV3 extends NCXDocument {
+public class NCXDocumentV3 {
     public static final String NAMESPACE_XHTML = "http://www.w3.org/1999/xhtml";
     public static final String NAMESPACE_EPUB = "http://www.idpf.org/2007/ops";
     public static final String LANGUAGE = "en";

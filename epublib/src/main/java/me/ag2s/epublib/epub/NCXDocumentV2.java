@@ -33,7 +33,7 @@ import me.ag2s.epublib.util.StringUtil;
  *
  * @author paul
  */
-public class NCXDocumentV2 extends NCXDocument {
+public class NCXDocumentV2 {
 
     public static final String NAMESPACE_NCX = "http://www.daisy.org/z3986/2005/ncx/";
     @SuppressWarnings("unused")
