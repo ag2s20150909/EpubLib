@@ -1,41 +1,28 @@
 package me.ag2s.book;
 
 
-import androidx.lifecycle.ViewModelProvider;
-
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.lifecycle.ViewModelProvider;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-
 import java.util.ArrayList;
 import java.util.List;
-
 
 import me.ag2s.book.base.BaseActivity;
 import me.ag2s.book.viewmodel.TestViewModel;
 import me.ag2s.epublib.domain.Author;
 import me.ag2s.epublib.domain.Book;
-
-import me.ag2s.epublib.domain.MediaType;
 import me.ag2s.epublib.domain.Metadata;
 import me.ag2s.epublib.domain.Relator;
 import me.ag2s.epublib.domain.Resource;
-
-import me.ag2s.epublib.domain.Resources;
-import me.ag2s.epublib.domain.SpineReference;
 import me.ag2s.epublib.domain.TOCReference;
-import me.ag2s.epublib.domain.TableOfContents;
 import me.ag2s.epublib.epub.EpubReader;
 import me.ag2s.epublib.epub.EpubWriter;
-
-import me.ag2s.epublib.epub.NCXDocumentV2;
 import me.ag2s.epublib.util.IOUtil;
 import me.ag2s.epublib.util.ResourceUtil;
 
@@ -62,7 +49,7 @@ public class MainActivity extends BaseActivity {
         try {
             EpubReader reader = new EpubReader();
             InputStream in = getAssets().open(name);
-            //InputStream in= new FileInputStream(new File(filepath));
+
             Book book = reader.readEpub(in);
             Metadata metadata = book.getMetadata();
             String bookInfo = "作者："+metadata.getAuthors()+
@@ -121,6 +108,7 @@ public class MainActivity extends BaseActivity {
             String path = this.getExternalFilesDir("book").getPath();
             // Create new Book
             Book book = new Book();
+            book.setVersion("3.0");
             Metadata metadata = book.getMetadata();
 
             // Set the title
@@ -159,7 +147,7 @@ public class MainActivity extends BaseActivity {
             book.setCoverImage(new Resource(inputStream,"cover.jpg"));
 
             // Add Chapter 1
-            String txt = "";
+            String txt;
             txt = IOUtil.Stream2String(getAssets().open("test.txt"));
             book.addSection("第一章",
                     ResourceUtil.createHTMLResource("第一章", txt));

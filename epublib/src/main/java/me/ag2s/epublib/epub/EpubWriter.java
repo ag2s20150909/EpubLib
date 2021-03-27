@@ -6,7 +6,6 @@ import me.ag2s.epublib.domain.Book;
 import me.ag2s.epublib.domain.MediaTypes;
 import me.ag2s.epublib.domain.Resource;
 import me.ag2s.epublib.util.IOUtil;
-//import io.documentnode.minilog.Logger;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -24,12 +23,12 @@ import org.xmlpull.v1.XmlSerializer;
  */
 public class EpubWriter {
 
-  private static String TAG= EpubWriter.class.getName();
+  private static final String TAG= EpubWriter.class.getName();
 
   // package
   static final String EMPTY_NAMESPACE_PREFIX = "";
 
-  private BookProcessor bookProcessor = BookProcessor.IDENTITY_BOOKPROCESSOR;
+  private BookProcessor bookProcessor;
 
   public EpubWriter() {
     this(BookProcessor.IDENTITY_BOOKPROCESSOR);
@@ -62,7 +61,12 @@ public class EpubWriter {
   private void initTOCResource(Book book) {
     Resource tocResource;
     try {
-      tocResource = NCXDocument.createNCXResource(book);
+      if(book.isEpub3()){
+        tocResource = NCXDocumentV3.createNCXResource(book);
+      }else {
+        tocResource = NCXDocumentV2.createNCXResource(book);
+      }
+
       Resource currentTocResource = book.getSpine().getTocResource();
       if (currentTocResource != null) {
         book.getResources().remove(currentTocResource.getHref());
@@ -77,8 +81,7 @@ public class EpubWriter {
   }
 
 
-  private void writeResources(Book book, ZipOutputStream resultStream)
-      throws IOException {
+  private void writeResources(Book book, ZipOutputStream resultStream) {
     for (Resource resource : book.getResources().getAll()) {
       writeResource(resource, resultStream);
     }
@@ -87,12 +90,10 @@ public class EpubWriter {
   /**
    * Writes the resource to the resultStream.
    *
-   * @param resource
-   * @param resultStream
-   * @throws IOException
+   * @param resource resource
+   * @param  resultStream resultStream
    */
-  private void writeResource(Resource resource, ZipOutputStream resultStream)
-      throws IOException {
+  private void writeResource(Resource resource, ZipOutputStream resultStream) {
     if (resource == null) {
       return;
     }
@@ -121,8 +122,8 @@ public class EpubWriter {
   /**
    * Writes the META-INF/container.xml file.
    *
-   * @param resultStream
-   * @throws IOException
+   * @param  resultStream resultStream
+   * @throws IOException IOException
    */
   private void writeContainer(ZipOutputStream resultStream) throws IOException {
     resultStream.putNextEntry(new ZipEntry("META-INF/container.xml"));
@@ -141,8 +142,8 @@ public class EpubWriter {
   /**
    * Stores the mimetype as an uncompressed file in the ZipOutputStream.
    *
-   * @param resultStream
-   * @throws IOException
+   * @param  resultStream resultStream
+   * @throws IOException IOException
    */
   private void writeMimeType(ZipOutputStream resultStream) throws IOException {
     ZipEntry mimetypeZipEntry = new ZipEntry("mimetype");
@@ -172,11 +173,13 @@ public class EpubWriter {
     return MediaTypes.NCX.getName();
   }
 
+
+  @SuppressWarnings("unused")
   public BookProcessor getBookProcessor() {
     return bookProcessor;
   }
 
-
+  @SuppressWarnings("unused")
   public void setBookProcessor(BookProcessor bookProcessor) {
     this.bookProcessor = bookProcessor;
   }

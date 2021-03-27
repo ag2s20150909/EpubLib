@@ -24,7 +24,7 @@ public class Navigator implements Serializable {
   private int currentPagePos;
   private String currentFragmentId;
 
-  private List<NavigationEventListener> eventListeners = new ArrayList<>();
+  private final List<NavigationEventListener> eventListeners = new ArrayList<>();
 
   public Navigator() {
     this(null);
@@ -135,8 +135,8 @@ public class Navigator implements Serializable {
    * Go to a specific section.
    * Illegal spine positions are silently ignored.
    *
-   * @param newSpinePos
-   * @param source
+   * @param newSpinePos f
+   * @param source f
    * @return The current position within the spine
    */
   public int gotoSpineSection(int newSpinePos, int newPagePos, Object source) {
@@ -186,7 +186,7 @@ public class Navigator implements Serializable {
    *
    * If you want the eventListeners called use gotoSection(index);
    *
-   * @param currentIndex
+   * @param currentIndex f
    */
   public void setCurrentSpinePos(int currentIndex) {
     this.currentSpinePos = currentIndex;

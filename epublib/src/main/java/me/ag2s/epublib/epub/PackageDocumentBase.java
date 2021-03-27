@@ -79,6 +79,10 @@ public class PackageDocumentBase {
     String version = "version";
     String scheme = "scheme";
     String property = "property";
+    //add for epub3
+    /**
+     * add for epub3
+     */
     String properties="properties";
   }
 

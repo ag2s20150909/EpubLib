@@ -3,7 +3,6 @@ package me.ag2s.epublib.domain;
 import android.util.Log;
 
 import me.ag2s.epublib.util.IOUtil;
-//import io.documentnode.minilog.Logger;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,7 +50,7 @@ public class LazyResource extends Resource {
    *
    * @return The contents of the Resource.
    *
-   * @throws IOException
+   * @throws IOException IOException
    */
   public InputStream getInputStream() throws IOException {
     if (isInitialized()) {
@@ -64,7 +63,7 @@ public class LazyResource extends Resource {
   /**
    * Initializes the resource by loading its data into memory.
    *
-   * @throws IOException
+   * @throws IOException IOException
    */
   public void initialize() throws IOException {
     getData();

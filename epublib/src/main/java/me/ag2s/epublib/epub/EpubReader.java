@@ -10,7 +10,6 @@ import me.ag2s.epublib.domain.Resources;
 import me.ag2s.epublib.domain.MediaTypes;
 import me.ag2s.epublib.util.ResourceUtil;
 import me.ag2s.epublib.util.StringUtil;
-//import io.documentnode.minilog.Logger;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -29,17 +28,17 @@ import org.w3c.dom.Element;
  */
 public class EpubReader {
 
-  private static String TAG= EpubReader.class.getName();
-  private BookProcessor bookProcessor = BookProcessor.IDENTITY_BOOKPROCESSOR;
+  private static final String TAG= EpubReader.class.getName();
+  private final BookProcessor bookProcessor = BookProcessor.IDENTITY_BOOKPROCESSOR;
 
   public Book readEpub(InputStream in) throws IOException {
     return readEpub(in, Constants.CHARACTER_ENCODING);
   }
-
+  @SuppressWarnings("unused")
   public Book readEpub(ZipInputStream in) throws IOException {
     return readEpub(in, Constants.CHARACTER_ENCODING);
   }
-
+  @SuppressWarnings("unused")
   public Book readEpub(ZipFile zipfile) throws IOException {
     return readEpub(zipfile, Constants.CHARACTER_ENCODING);
   }
@@ -50,7 +49,7 @@ public class EpubReader {
    * @param in the inputstream from which to read the epub
    * @param encoding the encoding to use for the html files within the epub
    * @return the Book as read from the inputstream
-   * @throws IOException
+   * @throws  IOException IOException
    */
   public Book readEpub(InputStream in, String encoding) throws IOException {
     return readEpub(new ZipInputStream(in), encoding);
@@ -64,8 +63,9 @@ public class EpubReader {
    * @param encoding the encoding for XHTML files
    *
    * @return this Book without loading all resources into memory.
-   * @throws IOException
+   * @throws IOException IOException
    */
+  @SuppressWarnings("unused")
   public Book readEpubLazy(ZipFile zipFile, String encoding)
       throws IOException {
     return readEpubLazy(zipFile, encoding,
@@ -87,7 +87,7 @@ public class EpubReader {
    * @param encoding the encoding for XHTML files
    * @param lazyLoadedTypes a list of the MediaType to load lazily
    * @return this Book without loading all resources into memory.
-   * @throws IOException
+   * @throws IOException IOException
    */
   public Book readEpubLazy(ZipFile zipFile, String encoding,
       List<MediaType> lazyLoadedTypes) throws IOException {
@@ -96,11 +96,11 @@ public class EpubReader {
     return readEpub(resources);
   }
 
-  public Book readEpub(Resources resources) throws IOException {
+  public Book readEpub(Resources resources) {
     return readEpub(resources, new Book());
   }
 
-  public Book readEpub(Resources resources, Book result) throws IOException {
+  public Book readEpub(Resources resources, Book result) {
     if (result == null) {
       result = new Book();
     }
@@ -163,7 +163,9 @@ public class EpubReader {
     return result;
   }
 
+  @SuppressWarnings("unused")
   private void handleMimeType(Book result, Resources resources) {
     resources.remove("mimetype");
+    //result.setResources(resources);
   }
 }
