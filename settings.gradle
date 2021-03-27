@@ -1,3 +1,2 @@
 rootProject.name = "Book"
-include ':app'
-include ':epublib'
+include ':app',':epublib'

@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import me.ag2s.epublib.Constants;
 import me.ag2s.epublib.domain.Book;
 import me.ag2s.epublib.domain.Guide;
