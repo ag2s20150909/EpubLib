@@ -148,6 +148,7 @@ public class MainActivity extends BaseActivity {
 
             // Add Chapter 1
             String txt;
+
             txt = IOUtil.Stream2String(getAssets().open("test.txt"));
             book.addSection("第一章",
                     ResourceUtil.createHTMLResource("第一章", txt));
