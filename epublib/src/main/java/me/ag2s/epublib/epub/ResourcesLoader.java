@@ -15,7 +15,6 @@ import me.ag2s.epublib.util.ResourceUtil;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -31,7 +30,7 @@ import java.util.zip.ZipInputStream;
  */
 public class ResourcesLoader {
 
-    private static String TAG = ResourceUtil.class.getName();
+    private static final String TAG = ResourcesLoader.class.getName();
 
 
     /**
@@ -41,11 +40,11 @@ public class ResourcesLoader {
      * contents loaded, but are stored as references to entries into the
      * ZipFile and are loaded on demand by the Resource system.
      *
-     * @param zipFile
-     * @param defaultHtmlEncoding
-     * @param lazyLoadedTypes
-     * @return
-     * @throws IOException
+     * @param zipFile             import epub zipfile
+     * @param defaultHtmlEncoding epub xhtml default encoding
+     * @param lazyLoadedTypes     lazyLoadedTypes
+     * @return Resources
+     * @throws IOException IOException
      */
     public static Resources loadResources(ZipFile zipFile,
                                           String defaultHtmlEncoding,
@@ -88,8 +87,8 @@ public class ResourcesLoader {
      * Whether the given href will load a mediaType that is in the
      * collection of lazilyLoadedMediaTypes.
      *
-     * @param href
-     * @param lazilyLoadedMediaTypes
+     * @param href                   href
+     * @param lazilyLoadedMediaTypes lazilyLoadedMediaTypes
      * @return Whether the given href will load a mediaType that is
      * in the collection of lazilyLoadedMediaTypes.
      */
@@ -109,10 +108,10 @@ public class ResourcesLoader {
      * Is fast, but may lead to memory problems when reading large books
      * on devices with small amounts of memory.
      *
-     * @param zipInputStream
-     * @param defaultHtmlEncoding
-     * @return
-     * @throws IOException
+     * @param zipInputStream      zipInputStream
+     * @param defaultHtmlEncoding defaultHtmlEncoding
+     * @return Resources
+     * @throws IOException IOException
      */
     public static Resources loadResources(ZipInputStream zipInputStream,
                                           String defaultHtmlEncoding) throws IOException {
@@ -146,7 +145,7 @@ public class ResourcesLoader {
             //when reading a file that is not a real zip archive or a zero length file, zipInputStream.getNextEntry()
             //throws an exception and does not advance, so loadResources enters an infinite loop
             //log.error("Invalid or damaged zip file.", e);
-            Log.e(TAG, "", e);
+            Log.e(TAG, e.getLocalizedMessage());
             try {
                 zipInputStream.closeEntry();
             } catch (Exception ignored) {
@@ -162,13 +161,13 @@ public class ResourcesLoader {
      * Is fast, but may lead to memory problems when reading large books
      * on devices with small amounts of memory.
      *
-     * @param zipFile
-     * @param defaultHtmlEncoding
-     * @return
-     * @throws IOException
+     * @param zipFile             zipFile
+     * @param defaultHtmlEncoding defaultHtmlEncoding
+     * @return Resources
+     * @throws IOException IOException
      */
     public static Resources loadResources(ZipFile zipFile, String defaultHtmlEncoding) throws IOException {
-        List<MediaType> ls=new ArrayList<>();
+        List<MediaType> ls = new ArrayList<>();
         return loadResources(zipFile, defaultHtmlEncoding, ls);
     }
 }
