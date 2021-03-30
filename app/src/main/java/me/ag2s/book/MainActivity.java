@@ -1,35 +1,42 @@
 package me.ag2s.book;
 
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.ViewModelProvider;
 
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
+import me.ag2s.base.FileTool;
+import me.ag2s.base.tools.FileTools;
 import me.ag2s.book.base.BaseActivity;
+import me.ag2s.book.tool.SharedPreferencesUtil;
+import me.ag2s.book.tool.TXTCallBack;
+import me.ag2s.book.tool.TextBook;
+import me.ag2s.book.tool.TextBookHeaper;
+import me.ag2s.book.tool.TextPrase;
 import me.ag2s.book.viewmodel.TestViewModel;
-import me.ag2s.epublib.domain.Author;
-import me.ag2s.epublib.domain.Book;
-import me.ag2s.epublib.domain.Metadata;
-import me.ag2s.epublib.domain.Relator;
-import me.ag2s.epublib.domain.Resource;
-import me.ag2s.epublib.domain.TOCReference;
-import me.ag2s.epublib.epub.EpubReader;
-import me.ag2s.epublib.epub.EpubWriter;
-import me.ag2s.epublib.util.IOUtil;
-import me.ag2s.epublib.util.ResourceUtil;
 
 public class MainActivity extends BaseActivity {
-    private final String TAG= getClass().getName();
+    private final String TAG = getClass().getName();
+
+    private AlertDialog.Builder builder;
     TextView tv;
     TestViewModel viewModel;
+    Uri baseuri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,152 +48,184 @@ public class MainActivity extends BaseActivity {
             tv.setText(msg);
             //tv.setText(Html.fromHtml(msg));
         });
+        viewModel.uri.observe(this, uri -> {
+            baseuri = uri;
+        });
+        viewModel.tbook.observe(this, textBook -> {
+            tv.setText(textBook.toString());
+        });
+        //第一步
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            //第二步， 第三个参数传送唯一值即可
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    1);
+        } else {
+            //取得权限后的业务逻辑
+        }
 
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
+        if (requestCode == FileTools.CREATE_FILE && resultCode == AppCompatActivity.RESULT_OK) {
+            super.onActivityResult(requestCode, resultCode, data);
+            String title = data.getStringExtra(Intent.EXTRA_TITLE);
+            Uri uri = data.getData();
+            getContentResolver().takePersistableUriPermission(uri, data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION));
 
-    private void readEPUB(String name) {
-        try {
-            EpubReader reader = new EpubReader();
-            InputStream in = getAssets().open(name);
 
-            Book book = reader.readEpub(in);
-            Metadata metadata = book.getMetadata();
-            String bookInfo = "作者："+metadata.getAuthors()+
-                    "\n出版社："+metadata.getPublishers()+
-                    "\n出版时间：" +metadata.getDates()+
-                    "\n书名："+metadata.getTitles()+
-                    "\n简介："+metadata.getDescriptions()+
-                    "\n语言："+metadata.getLanguage()+
-                    "\n";
-            StringBuilder ss = new StringBuilder(bookInfo);
+        }
+        if (requestCode == FileTools.REUEST_FILE_DIR && resultCode == AppCompatActivity.RESULT_OK) {
+            try {
+                viewModel.msg.postValue(data.getData().toString());
+                Uri uri = data.getData();
+                getContentResolver().takePersistableUriPermission(uri, data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        | Intent.FLAG_GRANT_WRITE_URI_PERMISSION));
+                //SharedPreferencesUtil.putBoolean(this,uri.getPath(),true);
+                //DocumentFile df = DocumentFile.fromSingleUri(this, uri);
 
-            ss.append("EPUB版本:").append(book.getVersion()).append("\n");
 
-            //通过获取线性的阅读菜单
-            List<Resource> spineReferences = book.getTableOfContents().getAllUniqueResources();
-            for(Resource sp:spineReferences){
-                Log.v(TAG,sp.getHref()+sp.getTitle());
-                ss.append("").append(sp.getHref()).append(sp.getTitle()).append("\n");
+            } catch (Exception e) {
+                SharedPreferencesUtil.putBoolean(this, data.getData().getPath(), false);
+                viewModel.msg.postValue(e.getLocalizedMessage());
             }
+        } else if (requestCode == FileTools.SELECT_TEXT && resultCode == AppCompatActivity.RESULT_OK) {
+            Uri uri = data.getData();
+            TextBook tbook = new TextBook();
 
-            //获取层级的菜单
-            List<TOCReference> tocReferences =book.getTableOfContents().getTocReferences();
-            for (TOCReference top:tocReferences){
-                Resource topres= top.getResource();
-                Log.v(TAG,"父目录"+topres.getHref()+topres.getTitle());
-                //ss.append("父目录").append(topres.getHref()).append(topres.getTitle()).append("\n");
-                if (top.getChildren().size()>0){
-                    for (TOCReference child:top.getChildren()){
-                        Resource childres= child.getResource();
-                        Log.v(TAG,"子目录"+childres.getHref()+childres.getTitle());
-                        //ss.append("子目录").append(childres.getHref()).append(childres.getTitle()).append("\n");
-                    }
+
+            try {
+                DocumentFile df = DocumentFile.fromSingleUri(this, uri);
+                //InputStream ins = getContentResolver().openInputStream(df.getUri());
+                //tbook.txtPath = df.getUri().toString();
+                tbook.txtPath = df.getName();
+                //tbook.temppath = file.getAbsolutePath();
+                tbook.uri = df.getUri();
+                Log.d(TAG, uri.toString());
+                TextBookHeaper.guestBook(tbook);
+                viewModel.tbook.postValue(tbook);
+            } catch (Exception e) {
+                viewModel.msg.postValue(FileTool.getStackTrace(e));
+                e.printStackTrace();
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        //第三步
+        switch (requestCode) {
+            case 1:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //处理取得权限和后的业务逻辑
+                } else {
+                    //未取得权限的业务逻辑
+                    Toast.makeText(this, "You denied the permission", Toast.LENGTH_SHORT).show();
                 }
-            }
-
-
-
-            viewModel.msg.postValue(ss.toString());
-
-        } catch (Exception e) {
-            Log.e("APP", e.getLocalizedMessage());
+                break;
+            default:
         }
     }
+    //第一步在上面申请了
+
+    private void readContact() {
+
+    }
+
 
     public void readEPUB2(View view) {
-        readEPUB("epub2.epub");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final String[] s = {""};
+                TextBookHeaper.getNetBookInfo(viewModel.tbook.getValue(), new TXTCallBack() {
+                    @Override
+                    public void onRun(String msg) {
+                        s[0] = attachString(s[0], msg);
+                        viewModel.msg.postValue(s[0]);
+                    }
+
+                    @Override
+                    public void OnStart(TextBook msg) {
+
+                        s[0] = attachString(s[0], msg.toString());
+                        viewModel.msg.postValue(s[0]);
+                    }
+
+                    @Override
+                    public void onFinish(TextBook msg) {
+
+                        s[0] = attachString(s[0], msg.toString());
+                        viewModel.msg.postValue(s[0]);
+                    }
+                });
+            }
+        }).start();
+
+
     }
 
     public void readEPUB3(View view) {
-        readEPUB("epub3.epub");
+        TextBook tbook = viewModel.tbook.getValue();
+        Uri uri = FileTools.pathToTreeUri("ag2sapp");
+
+        if (FileTools.hasPremistion(uri)) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    final String[] s = {""};
+                    TextPrase tp = new TextPrase(tbook.txtPath);
+                    tp.prase(tbook, new TXTCallBack() {
+                        @Override
+                        public void onRun(String msg) {
+                            s[0] = attachString(s[0], msg);
+                            viewModel.msg.postValue(s[0]);
+                        }
+
+                        @Override
+                        public void OnStart(TextBook msg) {
+                            s[0] = attachString(s[0], msg.toString());
+                            viewModel.msg.postValue(s[0]);
+                        }
+
+                        @Override
+                        public void onFinish(TextBook msg) {
+
+                            s[0] = attachString(s[0], msg.toString());
+                            viewModel.msg.postValue(s[0]);
+                            FileTools.getALLText();
+                        }
+                    });
+                }
+            }).start();
+
+        } else {
+            FileTools.RequestDirPermision(this, "ag2saapp");
+        }
+
+
+    }
+
+
+    private String attachString(String old, String add) {
+        add += "\n" + old;
+        if (add.length() > 1000) {
+            add = add.substring(0, 1000);
+        }
+        return add;
     }
 
 
     public void createEPUB(View view) {
-        try {
-            String path = this.getExternalFilesDir("book").getPath();
-            // Create new Book
-            Book book = new Book();
-            book.setVersion("3.0");
-            Metadata metadata = book.getMetadata();
-
-            // Set the title
-            metadata.addTitle("大奉打更人");
-            //set language
-            metadata.setLanguage("zh-rCH");
-            // Add an Author
-            metadata.addAuthor(new Author("卖报小郎君"));
-            //添加贡献者
-            Author aa=new Author("Ag2s Epublib","v0.1");
-            aa.setRelator(Relator.BOOK_PRODUCER);
-            metadata.addContributor(aa);
-            //设置书籍的主题
-            ArrayList<String> subjs=new ArrayList<>();
-            subjs.add("穿越");
-            subjs.add("轻松");
-            subjs.add("阵法");
-            subjs.add("仙侠");
-            subjs.add("幻想修仙");
-            metadata.setSubjects(subjs);
+        FileTools.showFileChooser(this, FileTools.SELECT_TEXT);
 
 
-            metadata.addType("仙侠");
-            metadata.addType("幻想修仙");
-            metadata.addPublisher("Ag2SEpubLib");
-            metadata.addDescription("这个世界，有儒；有道；有佛；有妖；有术士。\n" +
-                    "警校毕业的许七安幽幽醒来，发现自己身处牢狱之中，三日后流放边陲.....\n" +
-                    "他起初的目的只是自保，顺便在这个没有人权的社会里当个富家翁悠闲度日。\n" +
-                    "......\n" +
-                    "多年后，许七安回首前尘，身后是早已逝去的敌人，以及累累白骨。\n" +
-                    "滚滚长江东逝水，浪花淘尽英雄，是非成败转头空。\n" +
-                    "青山依旧在，几度夕阳红。");
-//
-//             Set cover image
-            InputStream inputStream=getAssets().open("test.jpg");
-            book.setCoverImage(new Resource(inputStream,"cover.jpg"));
-
-            // Add Chapter 1
-            String txt;
-
-            txt = IOUtil.Stream2String(getAssets().open("test.txt"));
-            book.addSection("第一章",
-                    ResourceUtil.createHTMLResource("第一章", txt));
-            book.addSection("第二章",
-                    ResourceUtil.createHTMLResource("第一章", txt));
-            book.addSection("第三章",
-                    ResourceUtil.createHTMLResource("第一章", txt));
-
-
-            // Add css file
-            book.getResources().add(new Resource("h1 {color: blue;}p {text-indent:2em;}".getBytes(), "css/style.css"));
-
-            // Add Chapter 2
-            TOCReference chapter2 = book.addSection("Second Chapter",
-                    ResourceUtil.createHTMLResource("Second Chapter", txt));
-
-            // Add image used by Chapter 2
-//            book.getResources().add(
-//                    ResourceUtil.createHTMLResource("第一章", txt));
-
-            // Add Chapter2, Section 1
-            book.addSection(chapter2, "Chapter 2, section 1",
-                    ResourceUtil.createHTMLResource("Chapter 2, section 1", txt));
-
-            // Add Chapter 3
-            book.addSection("Conclusion",
-                    ResourceUtil.createHTMLResource("Conclusion", txt));
-
-            // Create EpubWriter
-            EpubWriter epubWriter = new EpubWriter();
-
-            // Write the Book as Epub
-            epubWriter.write(book, new FileOutputStream(path + "/test.epub"));
-            viewModel.msg.postValue("生成EPUB完成");
-        } catch (Exception e) {
-            e.printStackTrace();
-            viewModel.msg.postValue(e.getMessage());
-        }
     }
 
 

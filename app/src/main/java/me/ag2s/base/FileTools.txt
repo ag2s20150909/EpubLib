@@ -1,0 +1,92 @@
+package me.ag2s.base;
+import android.content.Intent;
+import android.app.Activity;
+import android.net.Uri;
+import java.net.URLEncoder;
+import androidx.documentfile.provider.DocumentFile;
+import android.content.Context;
+import java.io.OutputStream;
+
+public class FileTools {
+
+    public static final String TAG = "FileTools";
+
+
+	public static void createFile(Context context,String parent, String name) {
+       DocumentFile df1=DocumentFile.fromTreeUri(context,UrifromPath(parent));
+	   DocumentFile df2=df1.findFile(name);
+	   if(df2==null||!df2.exists()){
+		   df2=df1.createFile("*/*",name);
+	   }
+	}
+	
+	public static void saveFile(Context context,String parent,String name,byte[] data){
+		try{
+		DocumentFile df1=DocumentFile.fromTreeUri(context,UrifromPath(parent));
+		DocumentFile df2=df1.findFile(name);
+		if(df2==null||!df2.exists()){
+			df2=df1.createFile("*/*",name);
+		}
+		OutputStream ops=context.getContentResolver().openOutputStream(df2.getUri(),"w");
+		ops.write(data);
+		ops.flush();
+		ops.close();
+		}catch(Exception e){
+			
+		}
+	}
+	
+	public static OutputStream getOutStream(Context context,String parent,String name){
+		try{
+			DocumentFile df1=DocumentFile.fromTreeUri(context,UrifromPath(parent));
+			DocumentFile df2=df1.findFile(name);
+			if(df2==null||!df2.exists()){
+				df2=df1.createFile("*/*",name);
+			}else{
+				if(df2.isDirectory()){
+					df2.delete();
+					df2=df1.createFile("*/*",name);
+				}
+			}
+		OutputStream ots=context.getContentResolver().openOutputStream(df2.getUri(),"w");
+		return ots;
+		}catch(Exception e){
+			return null;
+		}
+	}
+	
+	public static Uri UrifromPath(String path) {
+		return Uri.parse(UriStringromPath(path));
+	}
+
+	public static String UriStringromPath(String path) {
+		if (path.startsWith("/sdcard/")) {
+			path = path.replace("/sdcard/", "");
+		} else if (path.startsWith("/storage/sdcard0/")) {
+			path = path.replace("/storage/sdcard0/", "");
+		}
+		try {
+			path = URLEncoder.encode(path, "utf-8");
+		} catch (Exception e) {
+
+		}
+		return "content://com.android.externalstorage.documents/tree/primary%3A" + path;
+	}
+	public static void showFileChooser(Activity a, int code) {
+
+		Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);
+
+		i.addCategory(Intent.CATEGORY_OPENABLE);
+		i.setType("text/*");
+		a.startActivityForResult(i, code);
+
+	}
+
+	public static void showFolderChooser(Activity a, int code) {
+		Intent i =new  Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+		a.startActivityForResult(i, code);
+	}
+
+
+
+}
