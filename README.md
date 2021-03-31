@@ -6,7 +6,7 @@ Comparing to the original epublib and epub4j, we contains the following changes:
 * Switched to Android library only work in Android.
 * Removed the dependency of kxml2,not need for Android.
 * Add support of EPUB 3.x.
-* Upgrade jzlib to last version.
+*  ~~Upgrade jzlib to last version.~~
 
 ## 使用方法
 
