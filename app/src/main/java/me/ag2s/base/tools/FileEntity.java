@@ -17,11 +17,11 @@ public class FileEntity {
         this.path = path;
     }
 
-    public long getSize() {
+    public String getSize() {
         return size;
     }
 
-    public void setSize(long size) {
+    public void setSize(String size) {
         this.size = size;
     }
 
@@ -43,9 +43,10 @@ public class FileEntity {
 
     public String name;
     public String path;
-    public long size;
+    public String size;
     public String id;
     public String time;
+    public String filetype;
 
     @Override
     public String toString() {
@@ -56,5 +57,9 @@ public class FileEntity {
                 ", id='" + id + '\'' +
                 ", time='" + time + '\'' +
                 '}';
+    }
+
+    public void setFileType(String string) {
+        this.filetype = string;
     }
 }

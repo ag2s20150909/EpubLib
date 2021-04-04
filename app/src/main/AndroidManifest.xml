@@ -9,12 +9,14 @@
     <application
         android:name="me.ag2s.base.APP"
         android:allowBackup="true"
+        android:requestLegacyExternalStorage="true"
+        android:fullBackupContent="@xml/backup_descriptor"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Book"
-        android:fullBackupContent="@xml/backup_descriptor">
+        android:theme="@style/Theme.Book">
+        <activity android:name="me.ag2s.base.file.FilePickerActivity" />
         <activity android:name=".activity.EpubReadActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>

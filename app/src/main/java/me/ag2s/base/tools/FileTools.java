@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.UriPermission;
 import android.database.Cursor;
@@ -24,14 +25,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
 import me.ag2s.base.APP;
-import me.ag2s.base.FileTool;
 
 public class FileTools {
     public static final String TAG = FileTools.class.getName();
@@ -75,57 +73,65 @@ public class FileTools {
                 .createInputStream();
     }
 
-    public static void getALLText() {
-        try {
-            List<FileEntity> files = new ArrayList<>();
-            // 扫描files文件库
-            Cursor c = null;
-            String select = "(" + MediaStore.Files.FileColumns.DATA + " LIKE '%.txt'" + " or " + MediaStore.Files.FileColumns.DATA + " LIKE '%.txt'" + ")";
-            c = APP.getContext().getContentResolver().query(MediaStore.Files.getContentUri("external"), null, select, null, null);
-            int columnIndexOrThrow_ID = c.getColumnIndexOrThrow(MediaStore.Video.Media._ID);
-            int columnIndexOrThrow_MIME_TYPE = c.getColumnIndexOrThrow(MediaStore.Video.Media.MIME_TYPE);
-            int columnIndexOrThrow_DATA = c.getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
-            int columnIndexOrThrow_SIZE = c.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE);
-            // 更改时间
-            int columnIndexOrThrow_DATE_MODIFIED = c.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_MODIFIED);
-            int tempId = 0;
-            while (c.moveToNext()) {
-                String path = c.getString(columnIndexOrThrow_DATA);
-                String minType = c.getString(columnIndexOrThrow_MIME_TYPE);
-                //LogUtil.d("FileManager", "path:" + path);
-                FileTool.writeLog("debug.txt", path);
-                int position_do = path.lastIndexOf(".");
-                if (position_do == -1) {
-                    continue;
-                }
-                int position_x = path.lastIndexOf(File.separator);
-                if (position_x == -1) {
-                    continue;
-                }
-                String displayName = path.substring(position_x + 1);
-                long size = c.getLong(columnIndexOrThrow_SIZE);
-                long modified_date = c.getLong(columnIndexOrThrow_DATE_MODIFIED);
-                File file = new File(path);
-                String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(file.lastModified()));
-                FileEntity info = new FileEntity();
-                info.setName(displayName);
-                info.setPath(path);
-                //info.setSize(ShowLongFileSzie(size));
-                info.setId((tempId++) + "");
-                info.setTime(time);
-                FileTool.writeLog("debug.txt", info.toString());
-                files.add(info);
-            }
-        } catch (Exception e) {
-            FileTool.writeLog("debug.txt", e.getLocalizedMessage());
+    /**
+     * 查找文件
+     *
+     * @return
+     */
+    public static ArrayList<FileEntity> getAllText(Context context) {
+
+        ArrayList<FileEntity> texts = new ArrayList<>();
+
+        String[] projection = new String[]{MediaStore.Files.FileColumns._ID,
+                MediaStore.Files.FileColumns.DATA, MediaStore.Files.FileColumns.TITLE,
+                MediaStore.Files.FileColumns.MIME_TYPE, MediaStore.Files.FileColumns.SIZE
+                , MediaStore.Files.FileColumns.DATE_MODIFIED, MediaStore.Files.FileColumns.MIME_TYPE};
+
+        //相当于我们常用sql where 后面的写法
+        String selection = MediaStore.Files.FileColumns.MIME_TYPE + "= ? "
+                + " or " + MediaStore.Files.FileColumns.MIME_TYPE + " = ? "
+                + " or " + MediaStore.Files.FileColumns.MIME_TYPE + " = ? "
+                + " or " + MediaStore.Files.FileColumns.MIME_TYPE + " = ? "
+                + " or " + MediaStore.Files.FileColumns.MIME_TYPE + " = ? ";
+
+        String[] selectionArgs = new String[]{"application/msword", "text/plain", "application/pdf", "application/vnd.ms-powerpoint", "application/vnd.ms-excel"};
+
+        Cursor cursor = context.getContentResolver().query(MediaStore.Files.getContentUri("external"),
+                projection,
+                selection,
+                selectionArgs,
+                MediaStore.Files.FileColumns.DATE_ADDED + " DESC");
+        FileEntity fileItem = new FileEntity();
+        while (cursor.moveToNext()) {
+
+            fileItem.setId(cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns._ID)));
+
+            fileItem.setName(cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.TITLE)));
+
+            fileItem.setPath(cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA)));
+
+            fileItem.setSize(cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.SIZE)));
+
+            fileItem.setTime(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_MODIFIED)));
+
+            fileItem.setFileType(cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.MIME_TYPE)));
+
+            texts.add(fileItem);
+
         }
+        cursor.close();
+        return texts;
 
     }
+
 
     public static boolean hasPremistion(Uri uri) {
         List<UriPermission> permissions = APP.getContext().getContentResolver().getPersistedUriPermissions();
         for (UriPermission permission : permissions) {
+
             if (uri.getPath().equals(permission.getUri().getPath())) {
+                Log.d(TAG, "URI:" + uri.getPath());
+                Log.d(TAG, "PERMISSION:" + permission.getUri().getPath());
                 return true;
             }
         }
@@ -153,12 +159,33 @@ public class FileTools {
         AlertDialog.Builder alertdialogbuilder = new AlertDialog.Builder(context);
         alertdialogbuilder.setTitle("请求文件夹读写权限");
         alertdialogbuilder.setMessage("请打开文件夹\n" + path + "\n并授予权限");
-        alertdialogbuilder.setPositiveButton("确定", null);
+        alertdialogbuilder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+                Uri parse = FileTools.pathToTreeUri(path);
+                //intent.setDataAndType(parse,"*/*");
+                intent.addFlags(
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                                | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                                | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, parse);
+                }
+                context.startActivityForResult(intent, REUEST_FILE_DIR);
+            }
+        });
         alertdialogbuilder.setNeutralButton("取消", null);
         final AlertDialog alertdialog1 = alertdialogbuilder.create();
         alertdialog1.show();
+
+        //context.getContentResolver().takePersistableUriPermission(parse, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+    }
+
+    public static void RequestDirPermision(AppCompatActivity context, Uri uri) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-        Uri parse = FileTools.pathToTreeUri(path);
+        //Uri parse = FileTools.pathToTreeUri(path);
         //intent.setDataAndType(parse,"*/*");
         intent.addFlags(
                 Intent.FLAG_GRANT_READ_URI_PERMISSION
@@ -166,10 +193,9 @@ public class FileTools {
                         | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
                         | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, parse);
+            intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
         }
         context.startActivityForResult(intent, REUEST_FILE_DIR);
-        //context.getContentResolver().takePersistableUriPermission(parse, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
     }
 
     private void sdcardAuth() {

@@ -21,6 +21,7 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.ViewModelProvider;
 
 import me.ag2s.base.FileTool;
+import me.ag2s.base.file.FilePickerActivity;
 import me.ag2s.base.tools.FileTools;
 import me.ag2s.book.base.BaseActivity;
 import me.ag2s.book.tool.SharedPreferencesUtil;
@@ -43,6 +44,7 @@ public class MainActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         tv = findViewById(R.id.tv);
+
         viewModel = new ViewModelProvider(this).get(TestViewModel.class);
         viewModel.msg.observe(this, msg -> {
             tv.setText(msg);
@@ -104,7 +106,7 @@ public class MainActivity extends BaseActivity {
                 tbook.txtPath = df.getName();
                 //tbook.temppath = file.getAbsolutePath();
                 tbook.uri = df.getUri();
-                Log.d(TAG, uri.toString());
+                Log.d(TAG, uri.getPath());
                 TextBookHeaper.guestBook(tbook);
                 viewModel.tbook.postValue(tbook);
             } catch (Exception e) {
@@ -199,7 +201,7 @@ public class MainActivity extends BaseActivity {
 
                             s[0] = attachString(s[0], msg.toString());
                             viewModel.msg.postValue(s[0]);
-                            FileTools.getALLText();
+                            //FileTools.g
                         }
                     });
                 }
@@ -221,12 +223,18 @@ public class MainActivity extends BaseActivity {
         return add;
     }
 
-
-    public void createEPUB(View view) {
+    /**
+     * @param view
+     */
+    public void chooseText(View view) {
         FileTools.showFileChooser(this, FileTools.SELECT_TEXT);
 
 
     }
 
 
+    public void testFunction(View view) {
+        Intent i = new Intent(MainActivity.this, FilePickerActivity.class);
+        startActivity(i);
+    }
 }
