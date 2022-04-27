@@ -45,7 +45,7 @@ dependencies {
     implementation project(path: ':epublib')
     implementation fileTree(dir: 'libs', include: ['*.aar', '*.jar'], exclude: [])
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
     //implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     //implementation 'org.jetbrains:annotations:15.0'
     //implementation files('libs\\jchardet-1.0.jar')
