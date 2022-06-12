@@ -69,7 +69,7 @@ dependencies {
     // https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
     implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.9.3'
     // https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp-dnsoverhttps
-    implementation group: 'com.squareup.okhttp3', name: 'okhttp-dnsoverhttps', version: '4.9.3'
+    implementation group: 'com.squareup.okhttp3', name: 'okhttp-dnsoverhttps', version: '4.10.0'
     // https://mvnrepository.com/artifact/com.squareup.picasso/picasso
     implementation group: 'com.squareup.picasso', name: 'picasso', version: '2.8'
     // https://mvnrepository.com/artifact/com.squareup.picasso/picasso
