@@ -67,7 +67,7 @@ dependencies {
     // https://mvnrepository.com/artifact/com.jakewharton/disklrucache
     implementation group: 'com.jakewharton', name: 'disklrucache', version: '2.0.2'
     // https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
-    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.9.3'
+    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.10.0'
     // https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp-dnsoverhttps
     implementation group: 'com.squareup.okhttp3', name: 'okhttp-dnsoverhttps', version: '4.9.3'
     // https://mvnrepository.com/artifact/com.squareup.picasso/picasso
