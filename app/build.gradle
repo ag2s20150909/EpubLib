@@ -62,7 +62,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-runtime:$lifecycle_version"
 
     // https://mvnrepository.com/artifact/org.jsoup/jsoup
-    implementation group: 'org.jsoup', name: 'jsoup', version: '1.14.3'
+    implementation group: 'org.jsoup', name: 'jsoup', version: '1.18.1'
 
     // https://mvnrepository.com/artifact/com.jakewharton/disklrucache
     implementation group: 'com.jakewharton', name: 'disklrucache', version: '2.0.2'
